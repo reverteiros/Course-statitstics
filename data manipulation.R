@@ -41,7 +41,7 @@ Bees <- read.csv("Data_bees.csv",header = T, sep = ";") %>%
 
 ################ now make groups within the data, and compute the values per group
 
-Bees_per_site <- read.csv("Data_bees_simplified.csv",header = T, sep = ";") %>%
+Bees_per_site <- read.csv("Data_bees.csv",header = T, sep = ";") %>%
   dplyr::filter(!is.na(SPEC_ID)) %>%
   dplyr::select(SPEC.TAXPRIO,REC,SPEC_ID,SPEC.GEN,SPEC.SP,SEX,N,TOPO,DAT2) %>%    # these are the columns you keep
   dplyr::select(-c(SPEC_ID,SPEC.SP)) %>%
@@ -49,7 +49,7 @@ Bees_per_site <- read.csv("Data_bees_simplified.csv",header = T, sep = ";") %>%
   dplyr::summarize(richness=n_distinct(SPEC.TAXPRIO),abundance=sum(N))
 
 
-Bee_species <- read.csv("Data_bees_simplified.csv",header = T, sep = ";") %>%
+Bee_species <- read.csv("Data_bees.csv",header = T, sep = ";") %>%
   dplyr::filter(!is.na(SPEC_ID)) %>%
   dplyr::select(SPEC.TAXPRIO,REC,SPEC_ID,SPEC.GEN,SPEC.SP,SEX,N,TOPO,DAT2) %>%    # these are the columns you keep
   dplyr::select(-c(SPEC_ID,SPEC.SP)) %>%
@@ -57,7 +57,7 @@ Bee_species <- read.csv("Data_bees_simplified.csv",header = T, sep = ";") %>%
   dplyr::summarize(sites=n_distinct(TOPO),abundance=sum(N),SD=sd(N),Mean=mean(N),Maximum=max(N),Minimum=min(N))
 
 
-Abundance_sp_site_sampling <- read.csv("Data_bees_simplified.csv",header = T, sep = ";") %>%
+Abundance_sp_site_sampling <- read.csv("Data_bees.csv",header = T, sep = ";") %>%
   dplyr::filter(!is.na(SPEC_ID)) %>%
   dplyr::select(SPEC.TAXPRIO,REC,SPEC_ID,SPEC.GEN,SPEC.SP,SEX,N,TOPO,DAT2) %>%    # these are the columns you keep
   dplyr::select(-c(SPEC_ID,SPEC.SP)) %>%
@@ -65,12 +65,26 @@ Abundance_sp_site_sampling <- read.csv("Data_bees_simplified.csv",header = T, se
   dplyr::summarize(abundance=sum(N))
 
 
-General_abundance <- read.csv("Data_bees_simplified.csv",header = T, sep = ";") %>%
+General_abundance <- read.csv("Data_bees.csv",header = T, sep = ";") %>%
   dplyr::filter(!is.na(SPEC_ID)) %>%
   dplyr::select(SPEC.TAXPRIO,REC,SPEC_ID,SPEC.GEN,SPEC.SP,SEX,N,TOPO,DAT2) %>%    # these are the columns you keep
   dplyr::select(-c(SPEC_ID,SPEC.SP)) %>%
   dplyr::group_by() %>%
   dplyr::summarize(abundance=sum(N))
+
+
+Per_collector <- read.csv("Data_bees.csv",header = T, sep = ";") %>%
+  dplyr::filter(!is.na(SPEC_ID)) %>%
+  dplyr::select(SPEC.TAXPRIO,REC,SPEC_ID,SPEC.GEN,SPEC.SP,SEX,N,TOPO,DAT2) %>%    # these are the columns you keep
+  dplyr::select(-c(SPEC_ID,SPEC.SP)) %>%
+  dplyr::group_by(REC) %>%
+  dplyr::summarize(abundance=sum(N)) %>%
+  dplyr::filter(REC=="RUELLE E.") 
+  
+  
+
+
+
 
 
 
@@ -86,10 +100,11 @@ Beetraits <- read.csv("Traits_bees.csv",header = T, sep = ";") %>%
 
 
 
-Bee_species <- read.csv("Data_bees_simplified.csv",header = T, sep = ";") %>%
+Bee_species <- read.csv("Data_bees.csv",header = T, sep = ";") %>%
   dplyr::filter(!is.na(SPEC_ID)) %>%
-  dplyr::select(SPEC.TAXPRIO,SPEC_ID,SPEC.GEN,SPEC.SP,SEX,N,TOPO,DAT2) %>%    # these are the columns you keep
+  dplyr::select(SPEC.TAXPRIO,REC,SPEC_ID,SPEC.GEN,SPEC.SP,SEX,N,TOPO,DAT2) %>%    # these are the columns you keep
   dplyr::select(-c(SPEC_ID,SPEC.SP)) %>%
+  dplyr::filter(REC=="RUELLE E.") %>%
   dplyr::group_by(SPEC.TAXPRIO) %>%
   dplyr::summarize(sites=n_distinct(TOPO),abundance=sum(N),SD=sd(N),Mean=mean(N),Maximum=max(N),Minimum=min(N))
 
@@ -106,8 +121,5 @@ Bees_and_traits <- Bee_species%>%
 Bees_and_traits <- Bee_species%>%
   dplyr::inner_join(Beetraits,by=c("SPEC.TAXPRIO")) 
 
-
-Bees_and_traits <- Bee_species%>%
-  dplyr::inner_join(Beetraits,by=c("SPEC.TAXPRIO")) 
 
 
