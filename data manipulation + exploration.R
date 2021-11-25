@@ -1,8 +1,8 @@
 
 library("tidyverse")
 library("tidyr")
-library('corrplot')
-library(GGally)
+library("corrplot")
+library("GGally")
 
 ######################## Introductory lines
 
