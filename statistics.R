@@ -2,6 +2,7 @@
 library("tidyverse")
 library("tidyr")
 library('corrplot')
+library(GGally)
 
 ######################## Introductory lines
 
@@ -29,54 +30,15 @@ hist(database$Honeybee_abundance)
 
 
 
+###################### make a graph with all correlations. Type 1
+
+ggpairs(database) 
+
+
+###################### make a graph with all correlations. Type 2
+
 M <- cor(database)
 corrplot(M, method = "circle")
 
-cor.test(database$Wild_abundance,database$Flower_abundance)#two variables
-
-ggplot(database, aes(x=Flower_abundance,y=Wild_abundance)) +
-  geom_point(alpha=0.3) +
-  theme_classic()
-
-
-
-
-########################## Lineal models. Model selection + model averaging
-
-library(MuMIn)
-library(caret)
-
-options(na.action = "na.fail")
-
-database <- read.table("linear.txt",header=T)
-names(database)
-
-hist(database$Flower_abundance) #check normality every variable. Not normal
-hist(log(database$Flower_abundance)) #better
-hist(sqrt(database$Flower_abundance))
-
-fit <- lm(Pollinator_richness~log(Flower_abundance)+Flower_richness+Honeybee_rate+Flower_richness*Honeybee_rate, data=database) # lineal model. The dependent variable has to be normal. If not, GLM
-
-# fit <- glm(Heterospecific_presence~log(Pollinator_richness)+Visitation_rate+Proportion_plant+Proportion_HB+Proportion_Bee+Proportion_Diptera,family=binomial, weights=Individuals_pollen, data=meandataperplotTVUF)
-
-car::vif(fit) # check correlations between variables. There are. Remove the highest. Check
-
-fit <- lm(Pollinator_richness~log(Flower_abundance)+Flower_richness+Honeybee_rate, data=database)
-
-car::vif(fit) # perfect. They have to be all less than 4 in value
-
-hist(resid(fit)) # check normality of residuals. Normal enough.
-
-summary(fit)
-plot(database$Pollinator_richness~database$Honeybee_rate)
-
-### Model selection
-fit <- lm(Pollinator_richness~log(Flower_abundance)+Flower_richness+Honeybee_rate, data=database)
-dd <- dredge(fit,extra="adjR^2")
-ddd <- subset(dd, delta < 2) # select the ones with value of AICc less than 2 points in difference
-subset(dd, delta < 2)
-### Model averaging
-avgmod.95delta2 <- model.avg(ddd) 
-summary(avgmod.95delta2) # select the conditional average
 
 
