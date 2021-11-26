@@ -16,6 +16,36 @@ setwd("C:/Users/535388/OneDrive - UMONS/R folders/Course-statitstics")
 
 
 
+########################## model with factor and quantitative variables. Wrong data distribution, just to understand the output with factors
+
+database<-read.csv("linear.csv", header=T, sep = ";") 
+
+fit <- lm(Pollinator_richness ~ Landscape, data=database) # you need a post-hoc test here
+summary(fit)
+
+fit <- lm(Pollinator_richness ~ Flower_richness + Landscape, data=database)
+summary(fit)
+
+fit <- lm(Pollinator_richness ~ Flower_richness * Landscape, data=database)
+summary(fit)
+
+
+
+########################## Lineal models. GLM - poisson distribution
+
+# Biological question: is the abundance of pollinators related to the abundance of flowers?
+
+database<-read.csv("linear.csv", header=T, sep = ";") 
+
+hist(database$Pollinator_abundance)
+
+fit <- glm(Pollinator_abundance~Flower_abundance,family=poisson, data=database)
+hist(resid(fit)) # check residuals
+summary(fit)
+
+plot(database$Pollinator_abundance~database$Flower_abundance)
+
+
 ########################## Lineal models. GLM - binomial distribution
 
 # Biological question: is the production of fruits related to the abundance of pollinators?
