@@ -1,12 +1,29 @@
+
+library(dplyr)
+library(tidyr)
+library(vegan)
+
+
+######################## Introductory lines
+
+# set the working directory, which is the folder containing the files
+# in my case:
+setwd("C:/Users/535388/OneDrive - UMONS/R folders/Course-statitstics")
+
+
+
+
 ########################## PCA
 
-database<-read.table("lineal.txt", header=T)
-databasepca <- database[,6:11]
+# Biological question: is the production of fruits related to the abundance of pollinators?
 
-prcomp(databasepca, scale = TRUE)
-plot(prcomp(databasepca))
-summary(prcomp(databasepca, scale = TRUE))
-biplot(prcomp(databasepca, scale = TRUE))
+database<-read.csv("linear.csv", header=T, sep = ";") %>%
+  select(-c(Site,Landscape))
+
+prcomp(database, scale = TRUE) 
+plot(prcomp(database))
+summary(prcomp(database, scale = TRUE))
+biplot(prcomp(database, scale = TRUE))
 
 
 ######################### CCA
@@ -24,9 +41,6 @@ vare.cca
 plot(vare.cca)
 
 
-database <- read.table("lineal.txt",header=T)
-bees <-read.table("Composition_pollinators.txt", header=T)
 
-vare.cca <- cca(bees ~ Flower_abundance+Flower_richness, data=database)
-vare.cca
-plot(vare.cca)
+
+
