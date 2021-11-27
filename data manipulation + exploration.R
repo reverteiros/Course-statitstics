@@ -131,26 +131,23 @@ Bees_and_traits <- Bee_species%>%
 # check there is no correlation between variables
 
 
-
-database<-read.table("linear.txt", header=T) 
+database<-read.csv("linear.csv",header = T, sep = ";") 
 
 hist(database$Flower_abundance)
 hist(database$Flower_richness)
 hist(database$Pollinator_richness)
 hist(database$Pollinator_abundance)
-hist(database$Wild_abundance)
-hist(database$Honeybee_abundance)
 
 
 
 ###################### make a graph with all correlations. Type 1
 
-ggpairs(database) 
+ggpairs(database[,2:6]) 
 
 
 ###################### make a graph with all correlations. Type 2
 
-M <- cor(database)
+M <- cor(database[,2:6])
 corrplot(M, method = "circle")
 
 

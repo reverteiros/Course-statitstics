@@ -5,6 +5,7 @@ library(MuMIn)
 library(caret)
 library(lme4)
 library(lmerTest)
+library(AER)
 
 
 ######################## Introductory lines
@@ -31,7 +32,7 @@ summary(fit)
 
 
 
-########################## Lineal models. GLM - poisson distribution
+########################## Lineal models. GLM - poisson + quasipoisson distribution
 
 # Biological question: is the abundance of pollinators related to the abundance of flowers?
 
@@ -44,6 +45,17 @@ hist(resid(fit)) # check residuals
 summary(fit)
 
 plot(database$Pollinator_abundance~database$Flower_abundance)
+
+
+dispersiontest(fit,trafo = NULL, alternative = "greater")
+# p < 0.05 = overdispersion. Quasipoisson
+# p > 0.05. No overdispersion. Poisson
+
+
+fit <- glm(Pollinator_abundance~Flower_abundance,family=quasipoisson, data=database)
+hist(resid(fit)) # check residuals
+summary(fit)
+
 
 
 ########################## Lineal models. GLM - binomial distribution
