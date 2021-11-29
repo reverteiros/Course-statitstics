@@ -34,27 +34,53 @@ summary(fit)
 
 ########################## Lineal models. GLM - poisson + negative binomial distribution
 
-# Biological question: is the abundance of pollinators related to the abundance of flowers?
+#Assumptions of GLMs for count data
 
-database<-read.csv("linear.csv", header=T, sep = ";") 
+#Exemple of Poisson GLM
+glm(data = database, Pollinator_richness~Temperature, family = "poisson")->glmtest
+summary(glmtest)
+#Let's check dispersion
+library(AER)# for dispersiontest()
+dispersiontest(glmtest, alternative ="greater", trafo = NULL)# We can reject H0 (p=0.004). variance = 2*mean ! 
+dispersiontest(glmtest, alternative ="greater", trafo = 2)#Alternatively variance = mean + 0.08 mean? (for a negative binomial distribution).
+#Theta should be around 1/0.08 = 12
+#Negative binomial should be more relevant
+library(MASS)# for glm.nb()
+glm.nb(data = database, Pollinator_richness~Temperature)->glmtest2 #Here is the negative binomial model
+glmtest2$theta # get theta using $. As expected; theta is around 12. It's a parameter on its own. 
+summary(glmtest2)# Parameters are significant !
 
-hist(database$Pollinator_abundance)
+#Now let's check significance 
+library(modEvA)# Pseudo R? as deviance explained
 
-fit <- glm(Pollinator_abundance~Flower_abundance+Flower_richness,family=poisson, data=database)
-hist(resid(fit)) # check residuals
-summary(fit)
+#For Poisson model
+(glmtest$null.deviance-glmtest$deviance)/glmtest$null.deviance # Deviance explained, the hard way
+Dsquared(glmtest)# Deviance explained with the package modEva
+glmtest$null.deviance-glmtest$deviance# Likelihood ratio, computed by hand
+anova(glmtest, test="Chisq")# Likelihood ratio + test with p value. It is significant.
 
-plot(database$Pollinator_abundance~database$Flower_abundance)
+#For Negative binomial model
+Dsquared(glmtest2)# Deviance explained
+anova(glmtest2, test = "Chisq")# Significant !
 
+#Is the new parameter theta useful in the model ? Let's compare Poisson and Negative binomial.
+library(lmtest)# lrtest() is used to test LL ratio between models.
+lrtest(glmtest,glmtest2)#The gain in explained deviance thanks to theta is significative.
 
-dispersiontest(fit,trafo = NULL, alternative = "greater")
-# p < 0.05 = overdispersion. Quasipoisson
-# p > 0.05. No overdispersion. Poisson
+#Checking the assumptions.
+library(statmod)# Needed for quantile residuals
+a<-qresid(glmtest2)# Here we save the quantile residuals
+qqPlot(a,ylab = "quantile residuals",envelope=0.95)# Check the stochastic component
+#Quantile residuals against fitted values
+scatter.smooth(y=a,x = glmtest2$fitted.values, line.col= "red", lpars = list(col ="red"), 
+               xlab ="fitted values", ylab="quantile residuals")
+#Quantile residuals against X
+scatter.smooth(y=a,x = database$Temperature, line.col= "red", lpars = list(col ="red"), 
+               xlab ="Temperature", ylab="quantile residuals")
 
+#Check for outliers
+plot( cooks.distance( glmtest2 ), type="h", las=1, ylab="Cook's distance D")
 
-fit <- glm.nb(Pollinator_abundance~Flower_abundance,data=database)
-hist(resid(fit)) # check residuals
-summary(fit)
 
 
 
@@ -72,7 +98,7 @@ Datafruitsandpollinators <- read.table("fruits and seeds.txt",header=T) %>%
 hist(Datafruitsandpollinators$Fruits) # binomial. only zeros and ones
 
 
-fit <- glm(Fruits~Pollinator_abundance+Morph,family=binomial, data=Datafruitsandpollinators)
+fit <- glm(Fruits~Pollinator_abundance+Morph,family=binomial(link = "logit"), data=Datafruitsandpollinators)
 car::vif(fit) # perfect. They have to be all less than 4 in value
 hist(resid(fit)) # check residuals
 summary(fit)
@@ -81,7 +107,7 @@ summary(fit)
 
 #### represent the binomial regression - logit regression
 
-fit <- glm(Fruits~Pollinator_abundance,family=binomial, data=Datafruitsandpollinators)
+fit <- glm(Fruits~Pollinator_abundance,family=binomial(link = "logit"), data=Datafruitsandpollinators)
 #car::vif(fit) # perfect. They have to be all less than 4 in value
 hist(resid(fit)) # check residuals
 summary(fit)
